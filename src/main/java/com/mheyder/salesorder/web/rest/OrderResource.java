@@ -51,29 +51,13 @@ public class OrderResource {
     private OrderService orderService;
     
     /**
-     * POST  /orders : Create a new order.
+     * POST  /orders : Add OrderItem to a new or existing Order.
      *
-     * @param order the order to create
-     * @return the ResponseEntity with status 201 (Created) and with body the new order, or with status 400 (Bad Request) if the order has already an ID
+     * @param orderItem the orderItem to add
+     * @return the ResponseEntity with status 201 (Created) and with body the order, or with status 400 (Bad Request) if not valid
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @RequestMapping(value = "/orders",
-        method = RequestMethod.POST,
-        produces = MediaType.APPLICATION_JSON_VALUE)
-    @Timed
-    //TODO remove createOrder()
-    public ResponseEntity<Order> createOrder(@Valid @RequestBody Order order) throws URISyntaxException {
-        log.debug("REST request to save Order : {}", order);
-        if (order.getId() != null) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("order", "idexists", "A new order cannot already have an ID")).body(null);
-        }
-        Order result = orderRepository.save(order);
-        return ResponseEntity.created(new URI("/api/orders/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert("order", result.getId().toString()))
-            .body(result);
-    }
-    
-    @RequestMapping(value = "/cart",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
@@ -166,7 +150,7 @@ public class OrderResource {
     public ResponseEntity<Order> updateOrderOld(@Valid @RequestBody Order order) throws URISyntaxException {
         log.debug("REST request to update Order : {}", order);
         if (order.getId() == null) {
-            return createOrder(order);
+            //return createOrder(order);
         }
         Order result = orderRepository.save(order);
         return ResponseEntity.ok()

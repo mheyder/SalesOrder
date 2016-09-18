@@ -4,6 +4,8 @@ import com.codahale.metrics.annotation.Timed;
 import com.mheyder.salesorder.domain.Product;
 
 import com.mheyder.salesorder.repository.ProductRepository;
+import com.mheyder.salesorder.security.AuthoritiesConstants;
+import com.mheyder.salesorder.security.SecurityUtils;
 import com.mheyder.salesorder.web.rest.util.HeaderUtil;
 import com.mheyder.salesorder.web.rest.util.PaginationUtil;
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
@@ -46,6 +49,7 @@ public class ProductResource {
         method = RequestMethod.POST,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Secured(AuthoritiesConstants.ADMIN)
     public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) throws URISyntaxException {
         log.debug("REST request to save Product : {}", product);
         if (product.getId() != null) {
@@ -70,6 +74,7 @@ public class ProductResource {
         method = RequestMethod.PUT,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Secured(AuthoritiesConstants.ADMIN)
     public ResponseEntity<Product> updateProduct(@Valid @RequestBody Product product) throws URISyntaxException {
         log.debug("REST request to update Product : {}", product);
         if (product.getId() == null) {

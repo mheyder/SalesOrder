@@ -1,5 +1,5 @@
 
-<div>
+<form name="editForm" role="form" novalidate ng-submit="vm.save()" show-validation>
     <h2><span>Product</span> {{vm.product.id}}</h2>
     <hr>
     <jhi-alert-error></jhi-alert-error>
@@ -16,7 +16,7 @@
         <dd>
             <span>{{vm.product.price}}</span>
         </dd>
-        <dt><span>Quantity</span></dt>
+        <dt><span>Stock</span></dt>
         <dd>
             <span>{{vm.product.quantity}}</span>
         </dd>
@@ -24,7 +24,34 @@
         <dd>
             <span>{{vm.product.isActive}}</span>
         </dd>
+        <dt>
+	        <button type="submit" ng-disabled="editForm.$invalid || vm.isSaving" class="btn btn-primary">
+		        <span>Buy</span>
+		    </button>
+		</dt>
+        <dd>
+        	<input type="number" class="form-control" name="quantity" id="field_quantity"
+                    ng-model="vm.itemOrder.quantity"
+                    required min="0" />
+            <div ng-show="editForm.quantity.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.quantity.$error.required">
+                    This field is required.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.quantity.$error.min" translate-value-min="1">
+                    This field should be more than 1.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.quantity.$error.number">
+                    This field should be a number.
+                </p>
+            </div>
+        </dd>
     </dl>
+    
+            
+            
 
     <button type="submit"
             ui-sref="{{ vm.previousState }}"
@@ -32,8 +59,10 @@
         <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span> Back</span>
     </button>
 
-    <button type="button" ui-sref="product-detail.edit({id:vm.product.id})" class="btn btn-primary">
+    <button type="button" ui-sref="product-detail.edit({id:vm.product.id})" has-authority="ROLE_ADMIN" class="btn btn-primary">
         <span class="glyphicon glyphicon-pencil"></span>
         <span class="hidden-xs hidden-sm"> Edit</span>
     </button>
-</div>
+        
+    
+</form>

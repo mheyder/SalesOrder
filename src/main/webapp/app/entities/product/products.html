@@ -1,7 +1,7 @@
 <div>
     <h2>Products</h2>
     <jhi-alert></jhi-alert>
-    <div class="container-fluid">
+    <div class="container-fluid" has-authority="ROLE_ADMIN">
         <div class="row">
             <div class="col-xs-4 no-padding-left">
                 <button class="btn btn-primary" ui-sref="product.new" >
@@ -36,7 +36,7 @@
                     <td>{{product.quantity}}</td>
                     <td>{{product.isActive}}</td>
                     <td class="text-right">
-                        <div class="btn-group flex-btn-group-container">
+                        <div class="btn-group flex-btn-group-container" has-authority="ROLE_ADMIN">
                             <button type="submit"
                                     ui-sref="product-detail({id:product.id})"
                                     class="btn btn-info btn-sm">

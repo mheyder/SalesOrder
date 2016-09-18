@@ -53,8 +53,7 @@ public class Order implements Serializable {
     @ManyToOne
     private ShippingAddress shippingAddress;
 
-    @OneToMany(mappedBy = "order")
-    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "order", cascade = CascadeType.ALL)
     private Set<OrderItem> orderItems = new HashSet<>();
 
     public Long getId() {
