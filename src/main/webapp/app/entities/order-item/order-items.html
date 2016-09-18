@@ -1,0 +1,70 @@
+<div>
+    <h2>Order Items</h2>
+    <jhi-alert></jhi-alert>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-4 no-padding-left">
+                <button class="btn btn-primary" ui-sref="order-item.new" >
+                    <span class="glyphicon glyphicon-plus"></span>
+                    <span >
+                        Create new Order Item
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <div class="table-responsive">
+        <table class="jh-table table table-striped">
+            <thead>
+                <tr jh-sort="vm.predicate" ascending="vm.reverse" callback="vm.transition()">
+                    <th jh-sort-by="id"><span>ID</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="price"><span>Price</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="quantity"><span>Quantity</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="product.name"><span>Product</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th jh-sort-by="order.id"><span>Order</span> <span class="glyphicon glyphicon-sort"></span></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="orderItem in vm.orderItems track by orderItem.id">
+                    <td><a ui-sref="order-item-detail({id:orderItem.id})">{{orderItem.id}}</a></td>
+                    <td>{{orderItem.price}}</td>
+                    <td>{{orderItem.quantity}}</td>
+                    <td>
+                        <a ui-sref="product-detail({id:orderItem.product.id})">{{orderItem.product.name}}</a>
+                    </td>
+                    <td>
+                        <a ui-sref="order-detail({id:orderItem.order.id})">{{orderItem.order.id}}</a>
+                    </td>
+                    <td class="text-right">
+                        <div class="btn-group flex-btn-group-container">
+                            <button type="submit"
+                                    ui-sref="order-item-detail({id:orderItem.id})"
+                                    class="btn btn-info btn-sm">
+                                <span class="glyphicon glyphicon-eye-open"></span>
+                                <span class="hidden-xs hidden-sm"></span>
+                            </button>
+                            <button type="submit"
+                                    ui-sref="order-item.edit({id:orderItem.id})"
+                                    class="btn btn-primary btn-sm">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                                <span class="hidden-xs hidden-sm"></span>
+                            </button>
+                            <button type="submit"
+                                    ui-sref="order-item.delete({id:orderItem.id})"
+                                    class="btn btn-danger btn-sm">
+                                <span class="glyphicon glyphicon-remove-circle"></span>
+                                <span class="hidden-xs hidden-sm"></span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="text-center">
+        <jhi-item-count page="vm.page" total="vm.queryCount" items-per-page="vm.itemsPerPage"></jhi-item-count>
+    </div>
+    <uib-pager total-items="vm.totalItems" ng-model="vm.page" ng-change="vm.transition()"></uib-pager>
+</div>

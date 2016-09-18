@@ -1,0 +1,35 @@
+
+<div>
+    <h2><span>Order Item</span> {{vm.orderItem.id}}</h2>
+    <hr>
+    <jhi-alert-error></jhi-alert-error>
+    <dl class="dl-horizontal jh-entity-details">
+        <dt><span>Price</span></dt>
+        <dd>
+            <span>{{vm.orderItem.price}}</span>
+        </dd>
+        <dt><span>Quantity</span></dt>
+        <dd>
+            <span>{{vm.orderItem.quantity}}</span>
+        </dd>
+        <dt><span>Product</span></dt>
+        <dd>
+            <a ui-sref="product-detail({id:vm.orderItem.product.id})">{{vm.orderItem.product.name}}</a>
+        </dd>
+        <dt><span>Order</span></dt>
+        <dd>
+            <a ui-sref="order-detail({id:vm.orderItem.order.id})">{{vm.orderItem.order.id}}</a>
+        </dd>
+    </dl>
+
+    <button type="submit"
+            ui-sref="{{ vm.previousState }}"
+            class="btn btn-info">
+        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span> Back</span>
+    </button>
+
+    <button type="button" ui-sref="order-item-detail.edit({id:vm.orderItem.id})" class="btn btn-primary">
+        <span class="glyphicon glyphicon-pencil"></span>
+        <span class="hidden-xs hidden-sm"> Edit</span>
+    </button>
+</div>
