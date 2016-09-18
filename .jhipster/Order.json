@@ -1,0 +1,68 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipName": "user",
+            "otherEntityName": "user",
+            "relationshipType": "many-to-one",
+            "relationshipValidateRules": [
+                "required"
+            ],
+            "otherEntityField": "login",
+            "ownerSide": true
+        },
+        {
+            "relationshipName": "coupon",
+            "otherEntityName": "coupon",
+            "relationshipType": "many-to-one",
+            "otherEntityField": "code"
+        },
+        {
+            "relationshipName": "shipment",
+            "otherEntityName": "shipment",
+            "relationshipType": "one-to-one",
+            "otherEntityField": "code",
+            "ownerSide": true,
+            "otherEntityRelationshipName": "order"
+        },
+        {
+            "relationshipName": "shippingAddress",
+            "otherEntityName": "shippingAddress",
+            "relationshipType": "many-to-one",
+            "otherEntityField": "address"
+        },
+        {
+            "relationshipName": "orderItem",
+            "otherEntityName": "orderItem",
+            "relationshipType": "one-to-many",
+            "otherEntityRelationshipName": "order"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "date",
+            "fieldType": "LocalDate"
+        },
+        {
+            "fieldName": "note",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "totalPrice",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "status",
+            "fieldType": "OrderStatus",
+            "fieldValues": "NEW,PENDING,PAID,CANCELLED,SHIPPED,COMPLETE",
+            "fieldValidateRules": [
+                "required"
+            ]
+        }
+    ],
+    "changelogDate": "20160918135725",
+    "dto": "no",
+    "service": "no",
+    "entityTableName": "sales_order",
+    "pagination": "pagination"
+}

@@ -1,0 +1,51 @@
+
+<div>
+    <h2><span>Order</span> {{vm.order.id}}</h2>
+    <hr>
+    <jhi-alert-error></jhi-alert-error>
+    <dl class="dl-horizontal jh-entity-details">
+        <dt><span>Date</span></dt>
+        <dd>
+            <span>{{vm.order.date | date:'mediumDate'}}</span>
+        </dd>
+        <dt><span>Note</span></dt>
+        <dd>
+            <span>{{vm.order.note}}</span>
+        </dd>
+        <dt><span>Total Price</span></dt>
+        <dd>
+            <span>{{vm.order.totalPrice}}</span>
+        </dd>
+        <dt><span>Status</span></dt>
+        <dd>
+            <span>{{vm.order.status}}</span>
+        </dd>
+        <dt><span>User</span></dt>
+        <dd>
+            {{vm.order.user.login}}
+        </dd>
+        <dt><span>Coupon</span></dt>
+        <dd>
+            <a ui-sref="coupon-detail({id:vm.order.coupon.id})">{{vm.order.coupon.code}}</a>
+        </dd>
+        <dt><span>Shipment</span></dt>
+        <dd>
+            <a ui-sref="shipment-detail({id:vm.order.shipment.id})">{{vm.order.shipment.code}}</a>
+        </dd>
+        <dt><span>Shipping Address</span></dt>
+        <dd>
+            <a ui-sref="shipping-address-detail({id:vm.order.shippingAddress.id})">{{vm.order.shippingAddress.address}}</a>
+        </dd>
+    </dl>
+
+    <button type="submit"
+            ui-sref="{{ vm.previousState }}"
+            class="btn btn-info">
+        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span> Back</span>
+    </button>
+
+    <button type="button" ui-sref="order-detail.edit({id:vm.order.id})" class="btn btn-primary">
+        <span class="glyphicon glyphicon-pencil"></span>
+        <span class="hidden-xs hidden-sm"> Edit</span>
+    </button>
+</div>
