@@ -1,0 +1,31 @@
+
+<div>
+    <h2><span>Shipment</span> {{vm.shipment.id}}</h2>
+    <hr>
+    <jhi-alert-error></jhi-alert-error>
+    <dl class="dl-horizontal jh-entity-details">
+        <dt><span>Code</span></dt>
+        <dd>
+            <span>{{vm.shipment.code}}</span>
+        </dd>
+        <dt><span>Note</span></dt>
+        <dd>
+            <span>{{vm.shipment.note}}</span>
+        </dd>
+        <dt><span>Status</span></dt>
+        <dd>
+            <span>{{vm.shipment.status}}</span>
+        </dd>
+    </dl>
+
+    <button type="submit"
+            ui-sref="{{ vm.previousState }}"
+            class="btn btn-info">
+        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span> Back</span>
+    </button>
+
+    <button type="button" ui-sref="shipment-detail.edit({id:vm.shipment.id})" class="btn btn-primary">
+        <span class="glyphicon glyphicon-pencil"></span>
+        <span class="hidden-xs hidden-sm"> Edit</span>
+    </button>
+</div>
