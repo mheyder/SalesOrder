@@ -77,11 +77,13 @@ public class OrderItem implements Serializable {
 
     public OrderItem product(Product product) {
         this.product = product;
+        this.price = product.getPrice();
         return this;
     }
 
     public void setProduct(Product product) {
         this.product = product;
+        this.price = product.getPrice();
     }
 
     public Order getOrder() {

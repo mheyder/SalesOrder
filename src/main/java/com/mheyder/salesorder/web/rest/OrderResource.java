@@ -2,8 +2,13 @@ package com.mheyder.salesorder.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.mheyder.salesorder.domain.Order;
-
+import com.mheyder.salesorder.domain.OrderItem;
+import com.mheyder.salesorder.domain.Product;
+import com.mheyder.salesorder.domain.enumeration.OrderStatus;
 import com.mheyder.salesorder.repository.OrderRepository;
+import com.mheyder.salesorder.repository.ProductRepository;
+import com.mheyder.salesorder.repository.UserRepository;
+import com.mheyder.salesorder.security.SecurityUtils;
 import com.mheyder.salesorder.web.rest.util.HeaderUtil;
 import com.mheyder.salesorder.web.rest.util.PaginationUtil;
 import org.slf4j.Logger;
@@ -34,6 +39,12 @@ public class OrderResource {
         
     @Inject
     private OrderRepository orderRepository;
+    
+    @Inject
+    private ProductRepository productRepository;
+    
+    @Inject
+    private UserRepository userRepository;
 
     /**
      * POST  /orders : Create a new order.
@@ -46,11 +57,60 @@ public class OrderResource {
         method = RequestMethod.POST,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    //TODO remove createOrder()
     public ResponseEntity<Order> createOrder(@Valid @RequestBody Order order) throws URISyntaxException {
         log.debug("REST request to save Order : {}", order);
         if (order.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("order", "idexists", "A new order cannot already have an ID")).body(null);
         }
+        Order result = orderRepository.save(order);
+        return ResponseEntity.created(new URI("/api/orders/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert("order", result.getId().toString()))
+            .body(result);
+    }
+    
+    @RequestMapping(value = "/cart",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    //TODO create test for addOrderItem()
+    public ResponseEntity<Order> addOrderItem(@Valid @RequestBody OrderItem orderItem) throws URISyntaxException {
+        log.debug("REST request to add OrderItem : {}", orderItem);
+        orderItem.setId(null);
+        // validate      
+        Product product = orderItem.getProduct();
+        if (product != null && product.getId() != null) {
+        	product = productRepository.findOne(product.getId());
+        	orderItem.setProduct(product);
+        }
+        if (product == null || product.getId() == null) {
+            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("product", "notexists", "Product not exists")).body(null);
+        }
+        if (orderItem.getQuantity() > product.getQuantity()) {
+        	return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("product", "nostock", ((product.getQuantity() == 0) ? "no stock" : "Stock only" + product.getQuantity() + "left"))).body(null);
+        }
+        
+        Order order;
+        List<Order> orders = orderRepository.findByStatusAndUserIsCurrentUser(OrderStatus.NEW);
+        if (orders.isEmpty()) {
+        	//create new order
+        	order = new Order().status(OrderStatus.NEW)
+        			.user(userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin()).get())        			
+        			.addOrderItem(orderItem);
+        } else {
+        	order = orders.get(0);
+        	boolean isExisted = false;
+        	for (OrderItem item : order.getOrderItems()) {
+        		if (item.getProduct().getId() == product.getId()) {
+        			// product already existed
+        			item.setQuantity(item.getQuantity() + orderItem.getQuantity());
+        			isExisted = true;
+        			break;
+        		}
+        	}
+        	if (!isExisted) order.addOrderItem(orderItem);
+        }
+        
         Order result = orderRepository.save(order);
         return ResponseEntity.created(new URI("/api/orders/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert("order", result.getId().toString()))
