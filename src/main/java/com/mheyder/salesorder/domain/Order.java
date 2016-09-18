@@ -224,4 +224,10 @@ public class Order implements Serializable {
             ", status='" + status + "'" +
             '}';
     }
+
+	
+    public void submitted() {
+		// TODO Auto-generated method stub
+		date = LocalDate.now();
+	}
 }

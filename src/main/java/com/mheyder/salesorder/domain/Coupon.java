@@ -200,4 +200,8 @@ public class Coupon implements Serializable {
             ", isActive='" + isActive + "'" +
             '}';
     }
+
+	public void useCoupon() {
+		if (quantity > 0) quantity--;		
+	}
 }

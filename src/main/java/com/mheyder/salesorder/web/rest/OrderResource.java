@@ -9,6 +9,7 @@ import com.mheyder.salesorder.repository.OrderRepository;
 import com.mheyder.salesorder.repository.ProductRepository;
 import com.mheyder.salesorder.repository.UserRepository;
 import com.mheyder.salesorder.security.SecurityUtils;
+import com.mheyder.salesorder.service.OrderService;
 import com.mheyder.salesorder.web.rest.util.HeaderUtil;
 import com.mheyder.salesorder.web.rest.util.PaginationUtil;
 import org.slf4j.Logger;
@@ -46,6 +47,9 @@ public class OrderResource {
     @Inject
     private UserRepository userRepository;
 
+    @Inject
+    private OrderService orderService;
+    
     /**
      * POST  /orders : Create a new order.
      *
@@ -116,6 +120,34 @@ public class OrderResource {
             .headers(HeaderUtil.createEntityCreationAlert("order", result.getId().toString()))
             .body(result);
     }
+    
+    @RequestMapping(value = "/cart",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+  //TODO create test for updateOrder()
+    public ResponseEntity<Order> updateOrder(@Valid @RequestBody Order newOrder) throws URISyntaxException {
+        log.debug("REST request to update Order : {}", newOrder);
+        List<Order> orders = orderRepository.findByStatusAndUserIsCurrentUser(OrderStatus.NEW);
+        Order order = !orders.isEmpty() ? orders.get(0) : null;
+        if (newOrder.getId() == null || order == null || newOrder.getId() != order.getId()) {
+        	return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("order", "notexists", "Order not exists")).body(null);
+        }
+        
+        // update order
+        order.orderItems(newOrder.getOrderItems()).note(newOrder.getNote());
+        
+        if (newOrder.getStatus() == OrderStatus.PENDING) {
+        	order = orderService.submitOrder(order);
+        } else {
+        	order = orderRepository.save(order);
+        }
+        
+        return (order != null) ? ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert("order", order.getId().toString()))
+            .body(order)
+            : ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("order", "notvalid", "Order not valid")).body(null);
+    }
 
     /**
      * PUT  /orders : Updates an existing order.
@@ -130,7 +162,8 @@ public class OrderResource {
         method = RequestMethod.PUT,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<Order> updateOrder(@Valid @RequestBody Order order) throws URISyntaxException {
+    //TODO delete updateOrderOld()
+    public ResponseEntity<Order> updateOrderOld(@Valid @RequestBody Order order) throws URISyntaxException {
         log.debug("REST request to update Order : {}", order);
         if (order.getId() == null) {
             return createOrder(order);
@@ -190,6 +223,7 @@ public class OrderResource {
         method = RequestMethod.DELETE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    //TODO Delete deleteOrder();
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         log.debug("REST request to delete Order : {}", id);
         orderRepository.delete(id);
