@@ -1,0 +1,16 @@
+version: '2'
+services:
+    salesorder-app:
+        image: salesorder
+        external_links:
+            - salesorder-postgresql:postgresql
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod,swagger
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/SalesOrder
+            - JHIPSTER_SLEEP=10 # gives time for the database to boot before the application
+        ports:
+            - 8080:8080
+    salesorder-postgresql:
+        extends:
+            file: postgresql.yml
+            service: salesorder-postgresql
