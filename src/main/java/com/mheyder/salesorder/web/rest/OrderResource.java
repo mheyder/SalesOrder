@@ -7,9 +7,8 @@ import com.mheyder.salesorder.domain.Product;
 import com.mheyder.salesorder.domain.enumeration.OrderStatus;
 import com.mheyder.salesorder.repository.OrderRepository;
 import com.mheyder.salesorder.repository.ProductRepository;
-import com.mheyder.salesorder.repository.UserRepository;
-import com.mheyder.salesorder.security.SecurityUtils;
 import com.mheyder.salesorder.service.OrderService;
+import com.mheyder.salesorder.service.UserService;
 import com.mheyder.salesorder.web.rest.util.HeaderUtil;
 import com.mheyder.salesorder.web.rest.util.PaginationUtil;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ public class OrderResource {
     private ProductRepository productRepository;
     
     @Inject
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Inject
     private OrderService orderService;
@@ -81,7 +80,7 @@ public class OrderResource {
         Order order;
         List<Order> orders = orderRepository.findByStatusAndUserIsCurrentUser(OrderStatus.NEW);
         order = (!orders.isEmpty()) ? orders.get(0) : new Order().status(OrderStatus.NEW)
-        		.user(userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin()).get());
+        		.user(userService.getUserWithAuthorities());
         order.addOrderItem(orderItem);
         
         Order result = orderRepository.save(order);

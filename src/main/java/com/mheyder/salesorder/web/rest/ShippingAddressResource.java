@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.mheyder.salesorder.domain.ShippingAddress;
 
 import com.mheyder.salesorder.repository.ShippingAddressRepository;
+import com.mheyder.salesorder.service.UserService;
 import com.mheyder.salesorder.web.rest.util.HeaderUtil;
 import com.mheyder.salesorder.web.rest.util.PaginationUtil;
 import org.slf4j.Logger;
@@ -34,6 +35,9 @@ public class ShippingAddressResource {
         
     @Inject
     private ShippingAddressRepository shippingAddressRepository;
+    
+    @Inject
+    private UserService userService;
 
     /**
      * POST  /shipping-addresses : Create a new shippingAddress.
@@ -51,7 +55,7 @@ public class ShippingAddressResource {
         if (shippingAddress.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("shippingAddress", "idexists", "A new shippingAddress cannot already have an ID")).body(null);
         }
-        ShippingAddress result = shippingAddressRepository.save(shippingAddress);
+        ShippingAddress result = shippingAddressRepository.save(shippingAddress.user(userService.getUserWithAuthorities()));
         return ResponseEntity.created(new URI("/api/shipping-addresses/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert("shippingAddress", result.getId().toString()))
             .body(result);
@@ -95,7 +99,7 @@ public class ShippingAddressResource {
     public ResponseEntity<List<ShippingAddress>> getAllShippingAddresses(Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to get a page of ShippingAddresses");
-        Page<ShippingAddress> page = shippingAddressRepository.findAll(pageable);
+        Page<ShippingAddress> page = shippingAddressRepository.findByUserIsCurrentUser(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/shipping-addresses");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }

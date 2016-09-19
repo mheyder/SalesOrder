@@ -5,15 +5,14 @@
         .module('salesOrderApp')
         .controller('ShippingAddressDialogController', ShippingAddressDialogController);
 
-    ShippingAddressDialogController.$inject = ['$timeout', '$scope', '$stateParams', '$uibModalInstance', 'entity', 'ShippingAddress', 'User'];
+    ShippingAddressDialogController.$inject = ['$timeout', '$scope', '$stateParams', '$uibModalInstance', 'entity', 'ShippingAddress'];
 
-    function ShippingAddressDialogController ($timeout, $scope, $stateParams, $uibModalInstance, entity, ShippingAddress, User) {
+    function ShippingAddressDialogController ($timeout, $scope, $stateParams, $uibModalInstance, entity, ShippingAddress) {
         var vm = this;
 
         vm.shippingAddress = entity;
         vm.clear = clear;
         vm.save = save;
-        vm.users = User.query();
 
         $timeout(function (){
             angular.element('.form-group:eq(1)>input').focus();
