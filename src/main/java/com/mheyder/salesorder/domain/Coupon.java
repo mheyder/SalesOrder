@@ -207,6 +207,10 @@ public class Coupon implements Serializable {
         LocalDate today = LocalDate.now();
         return quantity > 0 && today.isAfter(startDate) && today.isBefore(endDate);
     }
+    
+    public boolean isValidToday(long price) {
+        return price >= minimumPrice && isValidToday();
+    }
 
     @Override
     public int hashCode() {
@@ -227,5 +231,9 @@ public class Coupon implements Serializable {
             ", isActive='" + isActive + "'" +
             ", minimumPrice='" + minimumPrice + "'" +
             '}';
+    }
+
+    public void addQuantity() {
+        quantity++;
     }
 }

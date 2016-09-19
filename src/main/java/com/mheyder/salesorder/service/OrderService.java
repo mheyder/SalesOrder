@@ -40,17 +40,15 @@ public class OrderService {
     		if (product.getQuantity() < item.getQuantity()) return null;
     		item.setProduct(product.quantity(product.getQuantity() - item.getQuantity()));
     		order.setTotalPrice(order.getTotalPrice() + (product.getPrice() * item.getQuantity()));
+    		productRepository.save(product);
     	}
     	
     	LocalDate currentDate = LocalDate.now();
     	if (order.getCoupon() != null) {
     		Coupon coupon = couponRepository.findOne(order.getCoupon().getId());
-    		if (coupon.getQuantity() == 0 || currentDate.isBefore(coupon.getStartDate()) || currentDate.isAfter(coupon.getEndDate())) {
-    			return null;
-    		}
+    		if (!coupon.isValidToday(order.getTotalPrice())) return null;
     		coupon.useCoupon();
-    		order.setCoupon(coupon);
-    		//TODO add minimum price
+    		order.setCoupon(couponRepository.save(coupon));
     		long normalPrice = order.getTotalPrice();
     		long totalPrice = coupon.isIsPercentage() ? normalPrice - (normalPrice * coupon.getAmount() / 100) : normalPrice - coupon.getAmount();
     		order.setTotalPrice(totalPrice);
@@ -58,6 +56,23 @@ public class OrderService {
     	
     	return orderRepository.save(order.date(currentDate).status(OrderStatus.PENDING));
     	
+    }
+    
+    public Order rejectOrder(Order order) {
+        log.debug("User reject Order{}", order);
+        // return product qty
+        for (OrderItem item : order.getOrderItems()) {
+            Product product = productRepository.findOne(item.getProduct().getId());
+            product.addQuantity(item.getQuantity());
+            item.setProduct(productRepository.save(product));
+        }
+        if (order.getCoupon() != null) {
+            Coupon coupon = couponRepository.getOne(order.getCoupon().getId());
+            coupon.addQuantity();
+            order.setCoupon(couponRepository.save(coupon));
+        }
+        
+        return orderRepository.save(order.status(OrderStatus.CANCELLED));
     }
 
 }

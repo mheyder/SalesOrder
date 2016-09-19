@@ -7,6 +7,8 @@ import com.mheyder.salesorder.domain.Product;
 import com.mheyder.salesorder.domain.enumeration.OrderStatus;
 import com.mheyder.salesorder.repository.OrderRepository;
 import com.mheyder.salesorder.repository.ProductRepository;
+import com.mheyder.salesorder.security.AuthoritiesConstants;
+import com.mheyder.salesorder.security.SecurityUtils;
 import com.mheyder.salesorder.service.OrderService;
 import com.mheyder.salesorder.service.UserService;
 import com.mheyder.salesorder.web.rest.util.HeaderUtil;
@@ -88,58 +90,62 @@ public class OrderResource {
             .headers(HeaderUtil.createEntityCreationAlert("order", result.getId().toString()))
             .body(result);
     }
-    
-    @RequestMapping(value = "/cart",
-            method = RequestMethod.PUT,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @Timed
-  //TODO create test for updateOrder()
-    public ResponseEntity<Order> updateOrder(@Valid @RequestBody Order newOrder) throws URISyntaxException {
-        log.debug("REST request to update Order : {}", newOrder);
-        List<Order> orders = orderRepository.findByStatusAndUserIsCurrentUser(OrderStatus.NEW);
-        Order order = !orders.isEmpty() ? orders.get(0) : null;
-        if (newOrder.getId() == null || order == null || newOrder.getId() != order.getId()) {
-        	return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("order", "notexists", "Order not exists")).body(null);
-        }
-        
-        // update order
-        order.orderItems(newOrder.getOrderItems()).note(newOrder.getNote());
-        
-        if (newOrder.getStatus() == OrderStatus.PENDING) {
-        	order = orderService.submitOrder(order);
-        } else {
-        	order = orderRepository.save(order);
-        }
-        
-        return (order != null) ? ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert("order", order.getId().toString()))
-            .body(order)
-            : ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("order", "notvalid", "Order not valid")).body(null);
-    }
 
     /**
      * PUT  /orders : Updates an existing order.
      *
-     * @param order the order to update
+     * @param updatedOrder the order to update
      * @return the ResponseEntity with status 200 (OK) and with body the updated order,
      * or with status 400 (Bad Request) if the order is not valid,
      * or with status 500 (Internal Server Error) if the order couldnt be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @RequestMapping(value = "/orders",
+    @RequestMapping(value = "/orders/{id}",
         method = RequestMethod.PUT,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     //TODO delete updateOrderOld()
-    public ResponseEntity<Order> updateOrderOld(@Valid @RequestBody Order order) throws URISyntaxException {
-        log.debug("REST request to update Order : {}", order);
-        if (order.getId() == null) {
-            //return createOrder(order);
+    public ResponseEntity<Order> updateOrderOld(@Valid @RequestBody Order updatedOrder, 
+            @PathVariable Long id, @RequestParam("action") String action) throws URISyntaxException {
+        log.debug("REST request to update Order : {}", updatedOrder);
+        Order currentOrder = (id != null) ? orderRepository.findOne(id) : null;
+        if (currentOrder == null || id == null) {
+            //bad request
         }
-        Order result = orderRepository.save(order);
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert("order", order.getId().toString()))
-            .body(result);
+        
+        Order result = null;
+        OrderStatus currentStatus = currentOrder.getStatus();
+        if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.USER)) {
+            if (currentStatus == OrderStatus.NEW) { 
+                // user perform update
+                currentOrder.orderItems(updatedOrder.getOrderItems())
+                .note(updatedOrder.getNote())
+                .shippingAddress(updatedOrder.getShippingAddress())
+                .coupon(updatedOrder.getCoupon());
+                result = (action != null && action.equalsIgnoreCase("submit"))
+                        ? orderService.submitOrder(currentOrder) : orderRepository.save(currentOrder);
+            } else if (currentStatus == OrderStatus.PENDING && updatedOrder.getPaymentInfo() != null) {
+                // user provide payment info
+                result = orderRepository.save(currentOrder.paymentInfo(updatedOrder.getPaymentInfo()));
+            }
+        } else if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN)) {
+            if (currentStatus == OrderStatus.PENDING && action != null && action.equalsIgnoreCase("approve")) {
+                // admin approve order
+                if (currentOrder.approveOrder()) {
+                    result = orderRepository.save(currentOrder);
+                }
+            } else if (currentStatus == OrderStatus.PENDING && action != null && action.equalsIgnoreCase("reject")) {
+                // admin reject order
+                result = orderService.rejectOrder(currentOrder);
+            } else if (currentStatus == OrderStatus.PAID && updatedOrder != null && updatedOrder.getShipment() != null) {
+                // admin provide shipment info
+                result = orderRepository.save(currentOrder.shipment(updatedOrder.getShipment()));
+            }
+        }
+        
+        return (result != null) ? ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert("order", result.getId().toString())).body(result)
+                : ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("order", "notvalid", "Request not valid")).body(null);
+        
     }
 
     /**
@@ -156,7 +162,9 @@ public class OrderResource {
     public ResponseEntity<List<Order>> getAllOrders(Pageable pageable)
         throws URISyntaxException {
         log.debug("REST request to get a page of Orders");
+        
         Page<Order> page = orderRepository.findAll(pageable);
+                
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/orders");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }

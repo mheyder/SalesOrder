@@ -144,4 +144,13 @@ public class Product implements Serializable {
             ", isActive='" + isActive + "'" +
             '}';
     }
+
+    public void addQuantity(int quantity) {
+        this.quantity += quantity;        
+    }
+    
+    public void withdrawQuantity(int quantity) {
+        if (this.quantity >= quantity) this.quantity -= quantity;
+        
+    }
 }
