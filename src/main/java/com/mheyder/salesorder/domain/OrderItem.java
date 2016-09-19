@@ -86,9 +86,9 @@ public class OrderItem implements Serializable {
         this.price = product.getPrice();
     }
 
-    public Order getOrder() {
+    /*public Order getOrder() {
         return order;
-    }
+    }*/
 
     public OrderItem order(Order order) {
         this.order = order;
@@ -99,6 +99,14 @@ public class OrderItem implements Serializable {
         this.order = order;
     }
 
+    public OrderItem merge(OrderItem orderItem) {
+    	if (orderItem.getProduct().getId() == product.getId()) {
+        	this.quantity += orderItem.getQuantity();
+        	this.price = orderItem.getProduct().getPrice();
+    	}
+    	return this;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -63,6 +63,9 @@ public class CouponResourceIntTest {
     private static final Boolean DEFAULT_IS_ACTIVE = false;
     private static final Boolean UPDATED_IS_ACTIVE = true;
 
+    private static final Long DEFAULT_MINIMUM_PRICE = 0L;
+    private static final Long UPDATED_MINIMUM_PRICE = 1L;
+
     @Inject
     private CouponRepository couponRepository;
 
@@ -104,7 +107,8 @@ public class CouponResourceIntTest {
                 .amount(DEFAULT_AMOUNT)
                 .isPercentage(DEFAULT_IS_PERCENTAGE)
                 .quantity(DEFAULT_QUANTITY)
-                .isActive(DEFAULT_IS_ACTIVE);
+                .isActive(DEFAULT_IS_ACTIVE)
+                .minimumPrice(DEFAULT_MINIMUM_PRICE);
         return coupon;
     }
 
@@ -137,6 +141,7 @@ public class CouponResourceIntTest {
         assertThat(testCoupon.isIsPercentage()).isEqualTo(DEFAULT_IS_PERCENTAGE);
         assertThat(testCoupon.getQuantity()).isEqualTo(DEFAULT_QUANTITY);
         assertThat(testCoupon.isIsActive()).isEqualTo(DEFAULT_IS_ACTIVE);
+        assertThat(testCoupon.getMinimumPrice()).isEqualTo(DEFAULT_MINIMUM_PRICE);
     }
 
     @Test
@@ -267,6 +272,24 @@ public class CouponResourceIntTest {
 
     @Test
     @Transactional
+    public void checkMinimumPriceIsRequired() throws Exception {
+        int databaseSizeBeforeTest = couponRepository.findAll().size();
+        // set the field null
+        coupon.setMinimumPrice(null);
+
+        // Create the Coupon, which fails.
+
+        restCouponMockMvc.perform(post("/api/coupons")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(coupon)))
+                .andExpect(status().isBadRequest());
+
+        List<Coupon> coupons = couponRepository.findAll();
+        assertThat(coupons).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void getAllCoupons() throws Exception {
         // Initialize the database
         couponRepository.saveAndFlush(coupon);
@@ -283,7 +306,8 @@ public class CouponResourceIntTest {
                 .andExpect(jsonPath("$.[*].amount").value(hasItem(DEFAULT_AMOUNT.intValue())))
                 .andExpect(jsonPath("$.[*].isPercentage").value(hasItem(DEFAULT_IS_PERCENTAGE.booleanValue())))
                 .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_QUANTITY)))
-                .andExpect(jsonPath("$.[*].isActive").value(hasItem(DEFAULT_IS_ACTIVE.booleanValue())));
+                .andExpect(jsonPath("$.[*].isActive").value(hasItem(DEFAULT_IS_ACTIVE.booleanValue())))
+                .andExpect(jsonPath("$.[*].minimumPrice").value(hasItem(DEFAULT_MINIMUM_PRICE.intValue())));
     }
 
     @Test
@@ -304,7 +328,8 @@ public class CouponResourceIntTest {
             .andExpect(jsonPath("$.amount").value(DEFAULT_AMOUNT.intValue()))
             .andExpect(jsonPath("$.isPercentage").value(DEFAULT_IS_PERCENTAGE.booleanValue()))
             .andExpect(jsonPath("$.quantity").value(DEFAULT_QUANTITY))
-            .andExpect(jsonPath("$.isActive").value(DEFAULT_IS_ACTIVE.booleanValue()));
+            .andExpect(jsonPath("$.isActive").value(DEFAULT_IS_ACTIVE.booleanValue()))
+            .andExpect(jsonPath("$.minimumPrice").value(DEFAULT_MINIMUM_PRICE.intValue()));
     }
 
     @Test
@@ -332,7 +357,8 @@ public class CouponResourceIntTest {
                 .amount(UPDATED_AMOUNT)
                 .isPercentage(UPDATED_IS_PERCENTAGE)
                 .quantity(UPDATED_QUANTITY)
-                .isActive(UPDATED_IS_ACTIVE);
+                .isActive(UPDATED_IS_ACTIVE)
+                .minimumPrice(UPDATED_MINIMUM_PRICE);
 
         restCouponMockMvc.perform(put("/api/coupons")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -351,6 +377,7 @@ public class CouponResourceIntTest {
         assertThat(testCoupon.isIsPercentage()).isEqualTo(UPDATED_IS_PERCENTAGE);
         assertThat(testCoupon.getQuantity()).isEqualTo(UPDATED_QUANTITY);
         assertThat(testCoupon.isIsActive()).isEqualTo(UPDATED_IS_ACTIVE);
+        assertThat(testCoupon.getMinimumPrice()).isEqualTo(UPDATED_MINIMUM_PRICE);
     }
 
     @Test

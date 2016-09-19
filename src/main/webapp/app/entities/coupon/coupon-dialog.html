@@ -135,6 +135,26 @@
                 </p>
             </div>
         </div>
+        <div class="form-group">
+            <label class="control-label" for="field_minimumPrice">Minimum Price</label>
+            <input type="number" class="form-control" name="minimumPrice" id="field_minimumPrice"
+                    ng-model="vm.coupon.minimumPrice"
+                    required min="0" />
+            <div ng-show="editForm.minimumPrice.$invalid">
+                <p class="help-block"
+                    ng-show="editForm.minimumPrice.$error.required">
+                    This field is required.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.minimumPrice.$error.min" translate-value-min="0">
+                    This field should be more than 0.
+                </p>
+                <p class="help-block"
+                    ng-show="editForm.minimumPrice.$error.number">
+                    This field should be a number.
+                </p>
+            </div>
+        </div>
 
     </div>
     <div class="modal-footer">

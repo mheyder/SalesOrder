@@ -80,24 +80,9 @@ public class OrderResource {
         
         Order order;
         List<Order> orders = orderRepository.findByStatusAndUserIsCurrentUser(OrderStatus.NEW);
-        if (orders.isEmpty()) {
-        	//create new order
-        	order = new Order().status(OrderStatus.NEW)
-        			.user(userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin()).get())        			
-        			.addOrderItem(orderItem);
-        } else {
-        	order = orders.get(0);
-        	boolean isExisted = false;
-        	for (OrderItem item : order.getOrderItems()) {
-        		if (item.getProduct().getId() == product.getId()) {
-        			// product already existed
-        			item.setQuantity(item.getQuantity() + orderItem.getQuantity());
-        			isExisted = true;
-        			break;
-        		}
-        	}
-        	if (!isExisted) order.addOrderItem(orderItem);
-        }
+        order = (!orders.isEmpty()) ? orders.get(0) : new Order().status(OrderStatus.NEW)
+        		.user(userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin()).get());
+        order.addOrderItem(orderItem);
         
         Order result = orderRepository.save(order);
         return ResponseEntity.created(new URI("/api/orders/" + result.getId()))

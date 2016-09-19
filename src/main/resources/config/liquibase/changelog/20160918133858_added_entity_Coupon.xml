@@ -53,6 +53,10 @@
                 <constraints nullable="false" />
             </column>
             
+            <column name="minimum_price" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            
             <!-- jhipster-needle-liquibase-add-column - Jhipster will add columns here, do not remove-->
         </createTable>
         

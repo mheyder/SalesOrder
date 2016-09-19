@@ -54,6 +54,11 @@ public class Coupon implements Serializable {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
+    @NotNull
+    @Min(value = 0)
+    @Column(name = "minimum_price", nullable = false)
+    private Long minimumPrice;
+
     public Long getId() {
         return id;
     }
@@ -166,6 +171,19 @@ public class Coupon implements Serializable {
         this.isActive = isActive;
     }
 
+    public Long getMinimumPrice() {
+        return minimumPrice;
+    }
+
+    public Coupon minimumPrice(Long minimumPrice) {
+        this.minimumPrice = minimumPrice;
+        return this;
+    }
+
+    public void setMinimumPrice(Long minimumPrice) {
+        this.minimumPrice = minimumPrice;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -179,6 +197,15 @@ public class Coupon implements Serializable {
             return false;
         }
         return Objects.equals(id, coupon.id);
+    }
+    
+    public void useCoupon() {
+        if (quantity > 0) quantity--;
+    }
+
+    public boolean isValidToday() {
+        LocalDate today = LocalDate.now();
+        return quantity > 0 && today.isAfter(startDate) && today.isBefore(endDate);
     }
 
     @Override
@@ -198,10 +225,7 @@ public class Coupon implements Serializable {
             ", isPercentage='" + isPercentage + "'" +
             ", quantity='" + quantity + "'" +
             ", isActive='" + isActive + "'" +
+            ", minimumPrice='" + minimumPrice + "'" +
             '}';
     }
-
-	public void useCoupon() {
-		if (quantity > 0) quantity--;		
-	}
 }

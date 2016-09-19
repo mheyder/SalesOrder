@@ -123,6 +123,7 @@
                                 isPercentage: false,
                                 quantity: null,
                                 isActive: false,
+                                minimumPrice: null,
                                 id: null
                             };
                         }
