@@ -53,6 +53,8 @@ public class OrderResourceIntTest {
 
     private static final OrderStatus DEFAULT_STATUS = OrderStatus.NEW;
     private static final OrderStatus UPDATED_STATUS = OrderStatus.PENDING;
+    private static final String DEFAULT_PAYMENT_INFO = "AAAAA";
+    private static final String UPDATED_PAYMENT_INFO = "BBBBB";
 
     @Inject
     private OrderRepository orderRepository;
@@ -91,7 +93,8 @@ public class OrderResourceIntTest {
                 .date(DEFAULT_DATE)
                 .note(DEFAULT_NOTE)
                 .totalPrice(DEFAULT_TOTAL_PRICE)
-                .status(DEFAULT_STATUS);
+                .status(DEFAULT_STATUS)
+                .paymentInfo(DEFAULT_PAYMENT_INFO);
         // Add required entity
         User user = UserResourceIntTest.createEntity(em);
         em.persist(user);
@@ -125,6 +128,7 @@ public class OrderResourceIntTest {
         assertThat(testOrder.getNote()).isEqualTo(DEFAULT_NOTE);
         assertThat(testOrder.getTotalPrice()).isEqualTo(DEFAULT_TOTAL_PRICE);
         assertThat(testOrder.getStatus()).isEqualTo(DEFAULT_STATUS);
+        assertThat(testOrder.getPaymentInfo()).isEqualTo(DEFAULT_PAYMENT_INFO);
     }
 
     @Test
@@ -159,7 +163,8 @@ public class OrderResourceIntTest {
                 .andExpect(jsonPath("$.[*].date").value(hasItem(DEFAULT_DATE.toString())))
                 .andExpect(jsonPath("$.[*].note").value(hasItem(DEFAULT_NOTE.toString())))
                 .andExpect(jsonPath("$.[*].totalPrice").value(hasItem(DEFAULT_TOTAL_PRICE.intValue())))
-                .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())));
+                .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
+                .andExpect(jsonPath("$.[*].paymentInfo").value(hasItem(DEFAULT_PAYMENT_INFO.toString())));
     }
 
     @Test
@@ -176,7 +181,8 @@ public class OrderResourceIntTest {
             .andExpect(jsonPath("$.date").value(DEFAULT_DATE.toString()))
             .andExpect(jsonPath("$.note").value(DEFAULT_NOTE.toString()))
             .andExpect(jsonPath("$.totalPrice").value(DEFAULT_TOTAL_PRICE.intValue()))
-            .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()));
+            .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
+            .andExpect(jsonPath("$.paymentInfo").value(DEFAULT_PAYMENT_INFO.toString()));
     }
 
     @Test
@@ -200,7 +206,8 @@ public class OrderResourceIntTest {
                 .date(UPDATED_DATE)
                 .note(UPDATED_NOTE)
                 .totalPrice(UPDATED_TOTAL_PRICE)
-                .status(UPDATED_STATUS);
+                .status(UPDATED_STATUS)
+                .paymentInfo(UPDATED_PAYMENT_INFO);
 
         restOrderMockMvc.perform(put("/api/orders")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -215,6 +222,7 @@ public class OrderResourceIntTest {
         assertThat(testOrder.getNote()).isEqualTo(UPDATED_NOTE);
         assertThat(testOrder.getTotalPrice()).isEqualTo(UPDATED_TOTAL_PRICE);
         assertThat(testOrder.getStatus()).isEqualTo(UPDATED_STATUS);
+        assertThat(testOrder.getPaymentInfo()).isEqualTo(UPDATED_PAYMENT_INFO);
     }
 
     @Test

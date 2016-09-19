@@ -119,6 +119,7 @@
                                 note: null,
                                 totalPrice: null,
                                 status: null,
+                                paymentInfo: null,
                                 id: null
                             };
                         }

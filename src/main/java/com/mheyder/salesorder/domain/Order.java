@@ -1,5 +1,7 @@
 package com.mheyder.salesorder.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -36,6 +38,9 @@ public class Order implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private OrderStatus status;
+
+    @Column(name = "payment_info")
+    private String paymentInfo;
 
     @ManyToOne
     @NotNull
@@ -114,6 +119,19 @@ public class Order implements Serializable {
         this.status = status;
     }
 
+    public String getPaymentInfo() {
+        return paymentInfo;
+    }
+
+    public Order paymentInfo(String paymentInfo) {
+        this.paymentInfo = paymentInfo;
+        return this;
+    }
+
+    public void setPaymentInfo(String paymentInfo) {
+        this.paymentInfo = paymentInfo;
+    }
+
     public User getUser() {
         return user;
     }
@@ -171,33 +189,13 @@ public class Order implements Serializable {
     }
 
     public Order orderItems(Set<OrderItem> orderItems) {
-    	setOrderItems(orderItems);
+        this.orderItems = orderItems;
         return this;
     }
 
-    public Order addOrderItem(OrderItem orderItem) { // add or update an OrderItem
-    	if (orderItem.getId() == null) { // new item
-    		boolean isNewItem = true;
-    		for (OrderItem item : orderItems) {
-    			if (item.getProduct().getId() == orderItem.getProduct().getId()) { // add to existing item
-    				orderItem = item.merge(orderItem);
-    				isNewItem = false;
-    				break;
-    			}    			
-    		}
-    		if (isNewItem) {
-    			orderItems.add(orderItem);
-                orderItem.setOrder(this);
-    		}
-    	} else {
-    		for (OrderItem item : orderItems) { //find existing item
-    			if (item.getId() == orderItem.getId()) {
-    				orderItem = item.merge(orderItem);
-    				break;
-    			}
-    		}
-    	}
-        calculateTotalPrice();
+    public Order addOrderItem(OrderItem orderItem) {
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
         return this;
     }
 
@@ -208,43 +206,7 @@ public class Order implements Serializable {
     }
 
     public void setOrderItems(Set<OrderItem> orderItems) {
-    	Set<OrderItem> deleteItems = new HashSet<>();
-    	boolean isFound;
-    	for (OrderItem item : this.orderItems) {
-    		isFound = false;
-    		for (OrderItem newItem : orderItems) {
-    			if (item.getId() == newItem.getId()) {
-    				isFound = true;
-    				if (newItem.getQuantity() == 0) deleteItems.add(newItem);
-    				break;
-    			}
-    		}
-    		if (!isFound) return; //new orderItems not valid
-    	}
-    	if (deleteItems.size() > 0) {
-    		for (OrderItem item : deleteItems) {
-    			orderItems.remove(item);
-    			item.setOrder(null);
-    		}
-    	}
-    	
         this.orderItems = orderItems;
-    }
-    
-    private void calculateTotalPrice() {
-    	totalPrice = 0L;
-    	for (OrderItem item : orderItems) {
-    		item.setPrice(item.getProduct().getPrice()); // always use latest price
-    		totalPrice = totalPrice + (item.getPrice() * item.getQuantity());
-    	}
-    	if (coupon != null) {
-    		if (coupon.isValidToday() && totalPrice >= coupon.getMinimumPrice()) {
-    			totalPrice -= coupon.isIsPercentage() ? (totalPrice * coupon.getAmount() / 100) : coupon.getAmount();
-    		} else {
-    			coupon = null; // not valid anymore
-    		}
-    		
-    	}
     }
 
     @Override
@@ -275,12 +237,7 @@ public class Order implements Serializable {
             ", note='" + note + "'" +
             ", totalPrice='" + totalPrice + "'" +
             ", status='" + status + "'" +
+            ", paymentInfo='" + paymentInfo + "'" +
             '}';
     }
-
-	
-    public void submitted() {
-		// TODO Auto-generated method stub
-		date = LocalDate.now();
-	}
 }

@@ -58,6 +58,10 @@
             "fieldValidateRules": [
                 "required"
             ]
+        },
+        {
+            "fieldName": "paymentInfo",
+            "fieldType": "String"
         }
     ],
     "changelogDate": "20160918135725",
